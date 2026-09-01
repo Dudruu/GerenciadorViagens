@@ -1,0 +1,138 @@
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  password      String
+  avatarUrl     String?
+  trips         Trip[]
+  collaborations TripCollaborator[]
+  expensesPaid  Expense[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Trip {
+  id             String   @id @default(cuid())
+  title          String
+  description    String?
+  startDate      DateTime
+  endDate        DateTime
+  coverImageUrl  String?
+  status         TripStatus @default(PLANNING)
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  destinations   Destination[]
+  expenses       Expense[]
+  collaborators  TripCollaborator[]
+  documents      Document[]
+  packingItems   PackingItem[]
+  notes          Note[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+enum TripStatus {
+  PLANNING
+  ONGOING
+  COMPLETED
+}
+
+model Destination {
+  id             String   @id @default(cuid())
+  tripId         String
+  trip           Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  name           String
+  country        String
+  city           String
+  arrivalDate    DateTime
+  departureDate  DateTime
+  order          Int
+  activities     Activity[]
+  accommodations Accommodation[]
+}
+
+model Activity {
+  id             String   @id @default(cuid())
+  destinationId  String
+  destination    Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  title          String
+  description    String?
+  date           DateTime
+  startTime      DateTime?
+  endTime        DateTime?
+  category       String
+  location       String?
+  cost           Float?
+}
+
+model Accommodation {
+  id               String   @id @default(cuid())
+  destinationId    String
+  destination      Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  name             String
+  address          String?
+  checkIn          DateTime
+  checkOut         DateTime
+  price            Float?
+  bookingUrl       String?
+  confirmationCode String?
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  tripId      String
+  trip        Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  description String
+  amount      Float
+  currency    String   @default("BRL")
+  category    String
+  date        DateTime
+  paidById    String?
+  paidBy      User?    @relation(fields: [paidById], references: [id])
+}
+
+model TripCollaborator {
+  id         String   @id @default(cuid())
+  tripId     String
+  trip       Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  role       CollaboratorRole @default(VIEWER)
+  invitedAt  DateTime @default(now())
+  acceptedAt DateTime?
+
+  @@unique([tripId, userId])
+}
+
+enum CollaboratorRole {
+  OWNER
+  EDITOR
+  VIEWER
+}
+
+model Document {
+  id         String   @id @default(cuid())
+  tripId     String
+  trip       Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  name       String
+  fileUrl    String
+  type       String
+  uploadedAt DateTime @default(now())
+}
+
+model PackingItem {
+  id        String  @id @default(cuid())
+  tripId    String
+  trip      Trip    @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  item      String
+  isChecked Boolean @default(false)
+  category  String?
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  tripId    String
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+}
