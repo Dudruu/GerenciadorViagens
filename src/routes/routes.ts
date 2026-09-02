@@ -1,8 +1,8 @@
 import type { FastifyInstance } from "fastify";
-
+import { authRoutes } from "./auth.routes";
 import z from "zod";
 
-import { FastifyTypedInstance } from "../types";
+import { FastifyTypedInstance } from "../types/types";
 
 export default function routes (app: FastifyTypedInstance){
     app.get("/useres",{
@@ -15,6 +15,9 @@ export default function routes (app: FastifyTypedInstance){
     },()=>{
         return []
     })
+    
+
+    app.register(authRoutes, { prefix: "/auth" });
 
     app.post ("/users",{
         schema:{
