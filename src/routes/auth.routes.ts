@@ -1,6 +1,6 @@
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import bcrypt from "bcryptjs";
-import { errorResponseSchema } from "../schemas/auth.commun.schema";
+import { errorResponseSchema } from "../schemas/commun.schema";
 
 import {
   registerSchema,

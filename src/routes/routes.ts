@@ -3,6 +3,7 @@ import { authRoutes } from "./auth.routes";
 import z from "zod";
 
 import { FastifyTypedInstance } from "../types/types";
+import { tripRoutes } from "./trip.route";
 
 export default function routes (app: FastifyTypedInstance){
     app.get("/useres",{
@@ -18,7 +19,7 @@ export default function routes (app: FastifyTypedInstance){
     
 
     app.register(authRoutes, { prefix: "/auth" });
-
+    app.register(tripRoutes,{prefix:"/trip"});
     app.post ("/users",{
         schema:{
             tags: ['users'],
