@@ -1,3 +1,5 @@
+import "dotenv/config"
+
 import {fastify} from "fastify";
 import {fastifyCors} from "@fastify/cors"
 import { validatorCompiler, serializerCompiler } from "fastify-type-provider-zod";
@@ -6,9 +8,11 @@ import fastifySwaggerUi from "@fastify/swagger-ui";
 import routes from "./routes/routes";
 
 import { ZodTypeProvider } from "fastify-type-provider-zod";
+import prismaPlugin from "./plugins/prisma";
 
 const app =  fastify().withTypeProvider<ZodTypeProvider>();
 
+app.register(prismaPlugin);
 app.setValidatorCompiler(validatorCompiler)
 app.setSerializerCompiler(serializerCompiler)
 
@@ -22,6 +26,11 @@ app.register(fastifySwagger,{
         }
     }
 })
+
+app.get("/health", async () => {
+  const result = await app.prisma.$queryRaw`SELECT 1 as ok`;
+  return { status: "ok", db: result };
+});
 
 app.register(routes)
 
