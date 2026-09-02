@@ -5,10 +5,10 @@ import z from "zod";
 import { FastifyTypedInstance } from "../types";
 
 export default function routes (app: FastifyTypedInstance){
-    app.get("/places",{
+    app.get("/useres",{
         schema: {
-            tags : ['places'], 
-            description :"List places"
+            tags : ['users'], 
+            description :"List users"
         },
 
         
@@ -16,10 +16,10 @@ export default function routes (app: FastifyTypedInstance){
         return []
     })
 
-    app.post ("/places",{
+    app.post ("/users",{
         schema:{
-            tags: ['places'],
-            description: 'create new place',
+            tags: ['users'],
+            description: 'create new user',
             body : z.object({
                 name: z.string(),
                 locate : z.string(), 

@@ -5,7 +5,9 @@ import {fastifySwagger} from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 import routes from "./routes/routes";
 
-const app =  fastify()
+import { ZodTypeProvider } from "fastify-type-provider-zod";
+
+const app =  fastify().withTypeProvider<ZodTypeProvider>();
 
 app.setValidatorCompiler(validatorCompiler)
 app.setSerializerCompiler(serializerCompiler)
