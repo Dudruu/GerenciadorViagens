@@ -22,5 +22,5 @@ export const updateDestination = createDestinationSchema.partial()
 
 export const destinationParams = z.object({
     tripId : z.string().uuid(),
-    id: z.string().cuid().optional()
+    id: z.string().uuid().optional()
 })
