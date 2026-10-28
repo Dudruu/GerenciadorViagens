@@ -1,34 +1,39 @@
-// src/schemas/activity.schema.ts
 import { z } from "zod";
 
-export const createActivitySchema = z.object({
-  title: z.string().min(1),
-  description: z.string().optional(),
-  date: z.coerce.date(),
-  startTime: z.coerce.date().optional(),
-  endTime: z.coerce.date().optional(),
-  category: z.string().min(1),
-  location: z.string().optional(),
-  cost: z.number().optional(),
+export const registerSchema = z.object({
+  name: z.string().trim().min(2, "Name must have at least 2 characters"),
+  email: z.string().trim().email("Invalid email format").toLowerCase(),
+  password: z
+    .string()
+    .min(6, "Password must have at least 6 characters")
+    .max(72, "Password must have at most 72 characters"),
+  avatarUrl: z.string().url("Invalid avatar URL").optional().nullable(),
 });
 
-export const updateActivitySchema = createActivitySchema.partial();
+export type RegisterInput = z.infer<typeof registerSchema>;
 
-export const activityResponseSchema = z.object({
+export const loginSchema = z.object({
+  email: z.string().trim().email("Invalid email format").toLowerCase(),
+  password: z.string().min(1, "Password is required"),
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;
+
+export const authResponseSchema = z.object({
+  token: z.string(),
+  user: z.object({
+    id: z.string(),
+    name: z.string(),
+    email: z.string().email(),
+    avatarUrl: z.string().nullable().optional(),
+  }),
+});
+
+export const userProfileResponseSchema = z.object({
   id: z.string(),
-  destinationId: z.string(),
-  title: z.string(),
-  description: z.string().nullable(),
-  date: z.date(),
-  startTime: z.date().nullable(),
-  endTime: z.date().nullable(),
-  category: z.string(),
-  location: z.string().nullable(),
-  cost: z.number().nullable(),
-});
-
-export const activityParams = z.object({
-  tripId: z.string(),
-  destinationId: z.string(),
-  id: z.string().optional(),
+  name: z.string(),
+  email: z.string().email(),
+  avatarUrl: z.string().nullable().optional(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
 });

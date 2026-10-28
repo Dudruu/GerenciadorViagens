@@ -1,15 +1,26 @@
-import { FastifyBaseLogger, FastifyInstance, RawReplyDefaultExpression, RawRequestDefaultExpression, RawServerBase, RawServerDefault } from "fastify";
+import {
+  FastifyBaseLogger,
+  FastifyInstance,
+  RawReplyDefaultExpression,
+  RawRequestDefaultExpression,
+  RawServerDefault,
+  FastifyRequest,
+  FastifyReply,
+} from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { PrismaClient } from "../generated/prisma/client";
-import { FastifyRequest, FastifyReply } from "fastify";
 
 export type FastifyTypedInstance = FastifyInstance<
-    RawServerDefault,
-    RawRequestDefaultExpression,
-    RawReplyDefaultExpression,
-    FastifyBaseLogger,
-    ZodTypeProvider
->
+  RawServerDefault,
+  RawRequestDefaultExpression,
+  RawReplyDefaultExpression,
+  FastifyBaseLogger,
+  ZodTypeProvider
+>;
+
+export interface AuthUserPayload {
+  userId: string;
+}
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -20,6 +31,7 @@ declare module "fastify" {
 
 declare module "@fastify/jwt" {
   interface FastifyJWT {
-    payload: { userId: string };
+    payload: AuthUserPayload;
+    user: AuthUserPayload;
   }
 }

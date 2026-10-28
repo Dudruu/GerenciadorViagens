@@ -1,13 +1,13 @@
-
 import fp from "fastify-plugin";
 import { FastifyPluginAsync, FastifyRequest, FastifyReply } from "fastify";
+import { UnauthorizedError } from "../errors/app-error";
 
 const authPlugin: FastifyPluginAsync = fp(async (app) => {
   app.decorate("authenticate", async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       await request.jwtVerify();
-    } catch (err) {
-      reply.status(401).send({ message: "Não autorizado" });
+    } catch {
+      throw new UnauthorizedError("Authentication token is missing or invalid");
     }
   });
 });

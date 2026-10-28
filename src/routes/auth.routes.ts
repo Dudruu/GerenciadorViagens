@@ -1,99 +1,66 @@
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import bcrypt from "bcryptjs";
-import { errorResponseSchema } from "../schemas/commun.schema";
-
+import { AuthController } from "../controllers/auth.controller";
 import {
   registerSchema,
   loginSchema,
   authResponseSchema,
+  userProfileResponseSchema,
 } from "../schemas/auth.schema";
-import { string } from "zod";
-import { request } from "node:http";
+import { errorResponseSchema } from "../schemas/common.schema";
 
 export const authRoutes: FastifyPluginAsyncZod = async (app) => {
   app.post(
     "/register",
     {
       schema: {
+        tags: ["Auth"],
+        summary: "Register new user",
+        description: "Creates a new user account with hashed password and returns a JWT token.",
         body: registerSchema,
         response: {
-        201: authResponseSchema,
-        409: errorResponseSchema,
-      },
+          201: authResponseSchema,
+          400: errorResponseSchema,
+          409: errorResponseSchema,
+        },
       },
     },
-
-    async (request, reply) => {
-      const { name, email, password } = request.body;
-
-      const existingUser = await app.prisma.user.findUnique({
-        where: { email },
-      });
-
-      if (existingUser) {
-        return reply
-          .status(409)
-          .send({ message: "The email already exists. " });
-      }
-
-      const hashPassword = await bcrypt.hash(password,10)
-
-      const user = await app.prisma.user.create({
-            data:{
-                name,
-                email,
-                password:hashPassword
-            }
-      })
-
-      const token  =  app.jwt.sign({userId: user.id})
-
-      return reply.status(201).send({
-        token,
-        user : {
-            id: user.id,
-            name: user.name,
-            email: user.email
-        }
-      })
-
-
-    },
+    AuthController.register
   );
 
-
-  app.post('/login',{
-    schema:{
+  app.post(
+    "/login",
+    {
+      schema: {
+        tags: ["Auth"],
+        summary: "User login",
+        description: "Authenticates user credentials and returns a JWT token.",
         body: loginSchema,
         response: {
-        201: authResponseSchema,
-        409: errorResponseSchema,
+          200: authResponseSchema,
+          400: errorResponseSchema,
+          401: errorResponseSchema,
+        },
       },
-    }
-  },
-    async (request,reply)=>{
-        const {email,password} = request.body
-        const user = await app.prisma.user.findUnique({where:{email}})
-
-        if(!user){
-            return reply.status(409).send({message:"This acount doesn't exist!"})
-        }
-
-        const passwordMatches = await bcrypt.compare(password, user.password);
-        if (!passwordMatches){
-            return reply.status(409).send({message:"The password does not match"})
-        }
-
-        const token = app.jwt.sign({userId : user.id})
-
-        return reply.send({
-            token,
-            user:{ id: user.id, name:user.name, email:user.email, }
-        });
-    }
+    },
+    AuthController.login
   );
 
-
-
-
+  app.get(
+    "/me",
+    {
+      preHandler: [app.authenticate],
+      schema: {
+        tags: ["Auth"],
+        summary: "Current user profile",
+        description: "Returns the authenticated user's profile.",
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: userProfileResponseSchema,
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+        },
+      },
+    },
+    AuthController.me
+  );
 };

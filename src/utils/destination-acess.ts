@@ -1,5 +1,4 @@
-// src/utils/destination-access.ts
-import { PrismaClient } from"../";
+import { PrismaClient } from "../generated/prisma/client";
 
 export async function checkDestinationBelongsToTrip(
   prisma: PrismaClient,
